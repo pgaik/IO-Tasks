@@ -4,6 +4,7 @@ import com.io.mtask.activity.dao.ActivityDAO
 import com.io.mtask.activity.entity.Activity
 import com.io.mtask.core.database.DataSource
 import com.io.mtask.core.database.MongoModule
+
 import com.io.mtask.sequence.dao.SequenceDAO
 import com.io.mtask.task.dao.TaskDAO
 import com.io.mtask.task.dao.TaskStatusDAO
@@ -30,80 +31,91 @@ ratpack {
     }
 
     handlers {
-        all RequestLogger.ncsa(logger)
+        all {
+            RequestLogger.ncsa(logger)
+        }
         get {
             render "Tasks!"
         }
-        get('task') { TaskDAO taskDAO ->
-            Promise.value(request.queryParams).map() { map ->
-                def findData = new TaskFindData()
-                findData.number = map.number != null ? Long.valueOf(map.number) : null
-                findData.name = map.name
-                findData.description = map.description
-                findData.createdBy = map.createdBy
-                findData
-            }.onError() { findData ->
-                response.status(400).send()
-            }.then { findData ->
-                render(json(taskDAO.find(findData)))
-            }
-        }
-        get('task/:id') { TaskDAO taskDAO ->
-            parse(fromJson(String)).map { String id ->
-                return new ObjectId(id)
-            }.onError {
-                response.status(400).send()
-            }.then { ObjectId task ->
-                render(json(taskDAO.get(task)))
-            }
-        }
-        post('task') { TaskDAO taskDAO, SequenceDAO sequence, TaskValidator validator ->
-            parse(fromJson(Task)).map { Task task ->
-                validator.validate(task)
-                task.number = sequence.getNext('task')
-                task
-            }.onError {
-                response.status(400).send()
-            }.then { Task task ->
-                taskDAO.insert(task)
-                response.status(200).send()
-            }
-        }
-        delete('task/:id') { TaskDAO taskDAO ->
-            render(taskDAO.remove(new ObjectId(pathTokens.id)))
-        }
-        options('task') {
-            TaskDAO taskDAO ->
-                header('Allow', 'HEAD,GET,POST,DELETE,OPTIONS')
-                render(['GET': [
-                        'description': 'Find tasks',
-                        'parameters' : [
-                                'number'     : [
-                                        'type'       : 'number',
-                                        'description': 'Task number'
-                                ],
-                                'name'       : [
-                                        'type'       : 'string',
-                                        'description': 'Task name'
-                                ],
-                                'description': [
-                                        'type'       : 'string',
-                                        'description': 'Task name'
-                                ],
-                                'createdBy'  : [
-                                        'type'       : 'string',
-                                        'description': 'Task name'
-                                ],
-                                'assigned'   : [
-                                        'type'       : 'string',
-                                        'description': 'Task name'
-                                ],
-                                'example':[
-                                        'request':['number':1],
-                                        'response':[]
-                                ]
+        path('task') {
+            byMethod {
+                options { TaskDAO taskDAO ->
+                    header('Allow', 'HEAD,GET,POST,DELETE,OPTIONS')
+                    render(json(['GET': [
+                            'description': 'Find tasks',
+                            'parameters' : [
+                                    'number'     : [
+                                            'type'       : 'number',
+                                            'description': 'Task number'
+                                    ],
+                                    'name'       : [
+                                            'type'       : 'string',
+                                            'description': 'Task name'
+                                    ],
+                                    'description': [
+                                            'type'       : 'string',
+                                            'description': 'Task name'
+                                    ],
+                                    'createdBy'  : [
+                                            'type'       : 'string',
+                                            'description': 'Task name'
+                                    ],
+                                    'assigned'   : [
+                                            'type'       : 'string',
+                                            'description': 'Task name'
+                                    ],
+                                    'example'    : [
+                                            'request' : ['number': 1],
+                                            'response': []
+                                    ]
 
-                        ]]])
+                            ]]]))
+                }
+
+                get { TaskDAO taskDAO ->
+                    Promise.value(request.queryParams).map() { map ->
+                        def findData = new TaskFindData()
+                        findData.number = map.number != null ? Long.valueOf(map.number) : null
+                        findData.name = map.name
+                        findData.description = map.description
+                        findData.createdBy = map.createdBy
+                        findData
+                    }.onError() { findData ->
+                        response.status(400).send()
+                    }.then { findData ->
+                        render(json(taskDAO.find(findData)))
+                    }
+                }
+
+                post { TaskDAO taskDAO, SequenceDAO sequence, TaskValidator validator ->
+                    parse(fromJson(Task)).map { Task task ->
+                        validator.validate(task)
+                        task.number = sequence.getNext('task')
+                        task
+                    }.onError {
+                        response.status(400).send()
+                    }.then { Task task ->
+                        taskDAO.insert(task)
+                        response.status(200).send()
+                    }
+                }
+            }
+        }
+        path('task/:id') {
+            byMethod {
+                get { TaskDAO taskDAO ->
+                    parse(fromJson(String)).map { String id ->
+                        return new ObjectId(id)
+                    }.onError {
+                        response.status(400).send()
+                    }.then { ObjectId task ->
+                        render(json(taskDAO.get(task)))
+                    }
+                }
+                delete { TaskDAO taskDAO ->
+                    render(taskDAO.remove(new ObjectId(pathTokens.id)))
+                }
+            }
         }
         post('activity') { ActivityDAO activityDAO, SequenceDAO sequence ->
             parse(fromJson(Activity)).map { Activity activity ->
