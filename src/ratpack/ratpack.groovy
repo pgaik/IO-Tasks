@@ -26,7 +26,7 @@ final Logger logger = LoggerFactory.getLogger(ratpack.class);
 
 ratpack {
     bindings {
-        module new MongoModule(new DataSource(new JsonSlurper().parse(new File('..\\..\\config\\config.json')) as Map))
+        module new MongoModule(new DataSource(new JsonSlurper().parse(new File('config.json')) as Map))
     }
 
     handlers {

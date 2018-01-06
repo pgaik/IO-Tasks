@@ -1,6 +1,5 @@
 package com.io.mtask.core.base.dao
 
-import com.io.mtask.activity.dto.BaseFindData
 import com.io.mtask.core.base.model.BaseEntity
 import org.bson.types.ObjectId
 import org.mongodb.morphia.Datastore
