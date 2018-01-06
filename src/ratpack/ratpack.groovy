@@ -13,17 +13,24 @@ import com.io.mtask.task.entity.TaskStatus
 import com.io.mtask.task.valid.TaskValidator
 import groovy.json.JsonSlurper
 import org.bson.types.ObjectId
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import ratpack.exec.Promise
+import ratpack.handling.RequestLogger
 
 import static ratpack.groovy.Groovy.ratpack
 import static ratpack.jackson.Jackson.fromJson
 import static ratpack.jackson.Jackson.json
 
+final Logger logger = LoggerFactory.getLogger(ratpack.class);
+
 ratpack {
     bindings {
-        module new MongoModule(new DataSource(new JsonSlurper().parse(new File('D:\\Nauka\\io\\mtask\\config\\config.json')) as Map))
+        module new MongoModule(new DataSource(new JsonSlurper().parse(new File('..\\..\\config\\config.json')) as Map))
     }
+
     handlers {
+        all RequestLogger.ncsa(logger)
         get {
             render "Tasks!"
         }
