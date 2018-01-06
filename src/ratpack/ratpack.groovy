@@ -4,20 +4,19 @@ import com.io.mtask.activity.dao.ActivityDAO
 import com.io.mtask.activity.entity.Activity
 import com.io.mtask.core.database.DataSource
 import com.io.mtask.core.database.MongoModule
-import com.io.mtask.core.handler.error.CErrorHandler
 import com.io.mtask.core.handler.error.SysErrorHandler
 import com.io.mtask.sequence.dao.SequenceDAO
 import com.io.mtask.task.dao.TaskDAO
 import com.io.mtask.task.dao.TaskStatusDAO
 import com.io.mtask.task.dto.TaskFindData
 import com.io.mtask.task.entity.Task
+import com.io.mtask.task.entity.TaskOptionResponse
 import com.io.mtask.task.entity.TaskStatus
 import com.io.mtask.task.valid.TaskValidator
 import groovy.json.JsonSlurper
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import ratpack.error.ClientErrorHandler
 import ratpack.error.ServerErrorHandler
 import ratpack.exec.Promise
 import ratpack.handling.RequestLogger
@@ -55,37 +54,8 @@ ratpack {
             byMethod {
                 options { TaskDAO taskDAO ->
                     header('Allow', 'HEAD,GET,POST,DELETE,OPTIONS')
-                    render(json(['GET': [
-                            'description': 'Find tasks',
-                            'parameters' : [
-                                    'number'     : [
-                                            'type'       : 'number',
-                                            'description': 'Task number'
-                                    ],
-                                    'name'       : [
-                                            'type'       : 'string',
-                                            'description': 'Task name'
-                                    ],
-                                    'description': [
-                                            'type'       : 'string',
-                                            'description': 'Task name'
-                                    ],
-                                    'createdBy'  : [
-                                            'type'       : 'string',
-                                            'description': 'Task name'
-                                    ],
-                                    'assigned'   : [
-                                            'type'       : 'string',
-                                            'description': 'Task name'
-                                    ],
-                                    'example'    : [
-                                            'request' : ['number': 1],
-                                            'response': []
-                                    ]
-
-                            ]]]))
+                    render(json(TaskOptionResponse.getResponse()))
                 }
-
                 get { TaskDAO taskDAO ->
                     Promise.value(request.queryParams).map() { map ->
                         def findData = new TaskFindData()
@@ -119,7 +89,7 @@ ratpack {
             byMethod {
                 get { TaskDAO taskDAO ->
                     Promise.value(pathTokens).map() { tokens ->
-                         new ObjectId(tokens.id)
+                        new ObjectId(tokens.id)
                     }.onError() { findData ->
                         response.status(400).send()
                     }.then { id ->
