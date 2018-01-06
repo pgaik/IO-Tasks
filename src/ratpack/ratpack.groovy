@@ -4,7 +4,8 @@ import com.io.mtask.activity.dao.ActivityDAO
 import com.io.mtask.activity.entity.Activity
 import com.io.mtask.core.database.DataSource
 import com.io.mtask.core.database.MongoModule
-
+import com.io.mtask.core.handler.error.CErrorHandler
+import com.io.mtask.core.handler.error.SErrorHandler
 import com.io.mtask.sequence.dao.SequenceDAO
 import com.io.mtask.task.dao.TaskDAO
 import com.io.mtask.task.dao.TaskStatusDAO
@@ -12,10 +13,13 @@ import com.io.mtask.task.dto.TaskFindData
 import com.io.mtask.task.entity.Task
 import com.io.mtask.task.entity.TaskStatus
 import com.io.mtask.task.valid.TaskValidator
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import ratpack.error.ClientErrorHandler
+import ratpack.error.ServerErrorHandler
 import ratpack.exec.Promise
 import ratpack.handling.RequestLogger
 
@@ -31,9 +35,18 @@ ratpack {
     }
 
     handlers {
-        all {
-            RequestLogger.ncsa(logger)
-        }
+        all RequestLogger.ncsa(logger)
+        all(RequestLogger.of { outcome ->
+            if (RequestLogger.LOGGER.infoEnabled) {
+                RequestLogger.LOGGER.info(
+                        'Request for {} took {}.{} seconds.',
+                        outcome.request.uri,
+                        outcome.duration.seconds,
+                        outcome.duration.nano)
+            }
+
+        })
+
         get {
             render "Tasks!"
         }
@@ -104,16 +117,23 @@ ratpack {
         path('task/:id') {
             byMethod {
                 get { TaskDAO taskDAO ->
-                    parse(fromJson(String)).map { String id ->
-                        return new ObjectId(id)
-                    }.onError {
+                    Promise.value(pathTokens).map() { tokens ->
+                         new ObjectId(tokens.id)
+                    }.onError() { findData ->
                         response.status(400).send()
-                    }.then { ObjectId task ->
-                        render(json(taskDAO.get(task)))
+                    }.then { id ->
+                        render(json(taskDAO.get(id)))
                     }
                 }
                 delete { TaskDAO taskDAO ->
-                    render(taskDAO.remove(new ObjectId(pathTokens.id)))
+                    Promise.value(pathTokens).map() { tokens ->
+                        new ObjectId(tokens.id)
+                    }.onError() { findData ->
+
+                    }.then { id ->
+                        taskDAO.remove(new ObjectId(pathTokens.id))
+                        response.status(200).send()
+                    }
                 }
             }
         }

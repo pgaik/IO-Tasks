@@ -9,4 +9,9 @@ class ActivityDAO extends BaseDAO<Activity> {
     ActivityDAO(Datastore datastore) {
         super(datastore)
     }
+
+    @Override
+    Class getClazz() {
+        Activity
+    }
 }

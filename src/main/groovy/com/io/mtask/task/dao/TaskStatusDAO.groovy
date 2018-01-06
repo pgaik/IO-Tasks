@@ -11,6 +11,11 @@ class TaskStatusDAO extends BaseDAO<TaskStatus> {
         super(datastore)
     }
 
+    @Override
+    Class getClazz() {
+        TaskStatus
+    }
+
     List<TaskStatus> find(TaskStatusFindData findData){
         datastore.find(TaskStatus).field('code').equal(findData.code).asList()
     }

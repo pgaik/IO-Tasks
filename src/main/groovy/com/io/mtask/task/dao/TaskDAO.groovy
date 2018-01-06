@@ -11,6 +11,11 @@ class TaskDAO extends BaseDAO<Task> {
         super(datastore)
     }
 
+    @Override
+    Class getClazz() {
+        Task
+    }
+
     List<Task> find(TaskFindData findData) {
         def find = datastore.find(Task).field('removedDate').equal(null)
         if (findData.number) {
