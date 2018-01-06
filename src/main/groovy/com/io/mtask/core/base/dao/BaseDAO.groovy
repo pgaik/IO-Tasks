@@ -1,6 +1,7 @@
 package com.io.mtask.core.base.dao
 
 import com.io.mtask.core.base.model.BaseEntity
+import com.io.mtask.core.exeption.NotFoundException
 import com.io.mtask.task.entity.Task
 import org.bson.types.ObjectId
 import org.mongodb.morphia.Datastore
@@ -23,7 +24,7 @@ abstract class BaseDAO<T extends BaseEntity> {
                 .field('_id').equal(objectId)
                 .field('removedDate').equal(null).get()
         if (!result) {
-            throw new Exception('NOT FOUND')
+            throw new NotFoundException()
         }
         result as T
     }

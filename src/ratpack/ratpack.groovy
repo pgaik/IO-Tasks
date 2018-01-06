@@ -5,7 +5,7 @@ import com.io.mtask.activity.entity.Activity
 import com.io.mtask.core.database.DataSource
 import com.io.mtask.core.database.MongoModule
 import com.io.mtask.core.handler.error.CErrorHandler
-import com.io.mtask.core.handler.error.SErrorHandler
+import com.io.mtask.core.handler.error.SysErrorHandler
 import com.io.mtask.sequence.dao.SequenceDAO
 import com.io.mtask.task.dao.TaskDAO
 import com.io.mtask.task.dao.TaskStatusDAO
@@ -13,7 +13,6 @@ import com.io.mtask.task.dto.TaskFindData
 import com.io.mtask.task.entity.Task
 import com.io.mtask.task.entity.TaskStatus
 import com.io.mtask.task.valid.TaskValidator
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -32,6 +31,8 @@ final Logger logger = LoggerFactory.getLogger(ratpack.class);
 ratpack {
     bindings {
         module new MongoModule(new DataSource(new JsonSlurper().parse(new File('config.json')) as Map))
+
+        bind ServerErrorHandler, SysErrorHandler
     }
 
     handlers {
