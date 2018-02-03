@@ -1,0 +1,9 @@
+{
+  "dataSource": {
+    "host": "localhost",
+    "port": 27017,
+    "database": "devio",
+    "noAuthorization": true
+  },
+  "baseUrl": "http://localhost:9000"
+}

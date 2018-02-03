@@ -7,16 +7,18 @@ class Config {
     private static Config INSTANCE = null
 
     DataSource dataSource = null
+    private String baseUrl
 
     private Config() {
     }
 
-    private init(){
-        File file = new File('./config/config.json')
-        def config = new JsonSlurper().parse(file).dataSource as Map
-        dataSource = new DataSource(host: config.host, port: config.port,
-                database: config.database, username: config.username,
-                password: config.password, source: config.source, noAuthorization:  config.noAuthorization)
+    private init() {
+        File file = new File('config/config.json')
+        def config = new JsonSlurper().parse(file) as Map
+        dataSource = new DataSource(host: config.dataSource.host, port: config.dataSource.port,
+                database: config.dataSource.database, username: config.dataSource.username,
+                password: config.dataSource.password, source: config.dataSource.source, noAuthorization: config.dataSource.noAuthorization)
+        baseUrl = config.baseUrl
     }
 
     static Config getInstance() {
@@ -25,5 +27,9 @@ class Config {
             INSTANCE.init()
         }
         return INSTANCE
+    }
+
+    String getBaseUrl() {
+        return baseUrl
     }
 }

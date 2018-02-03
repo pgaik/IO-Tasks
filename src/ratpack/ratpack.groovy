@@ -2,6 +2,7 @@ package ratpack
 
 import com.io.mtask.activity.dao.ActivityDAO
 import com.io.mtask.activity.entity.Activity
+import com.io.mtask.core.config.Config
 import com.io.mtask.core.database.DataSource
 import com.io.mtask.core.database.MongoModule
 import com.io.mtask.core.handler.error.SysErrorHandler
@@ -10,7 +11,7 @@ import com.io.mtask.task.dao.TaskDAO
 import com.io.mtask.task.dao.TaskStatusDAO
 import com.io.mtask.task.dto.TaskFindData
 import com.io.mtask.task.entity.Task
-import com.io.mtask.task.entity.TaskOptionResponse
+import com.io.mtask.task.constant.TaskOptionResponse
 import com.io.mtask.task.entity.TaskStatus
 import com.io.mtask.task.valid.TaskValidator
 import groovy.json.JsonSlurper
@@ -25,11 +26,15 @@ import static ratpack.groovy.Groovy.ratpack
 import static ratpack.jackson.Jackson.fromJson
 import static ratpack.jackson.Jackson.json
 
-final Logger logger = LoggerFactory.getLogger(ratpack.class);
+final Logger logger = LoggerFactory.getLogger(ratpack.class)
 
 ratpack {
+    serverConfig {
+        port(9000)
+        Config.getInstance()
+    }
     bindings {
-        module new MongoModule(new DataSource(new JsonSlurper().parse(new File('config.json')) as Map))
+        module new MongoModule(new DataSource(new JsonSlurper().parse(new File('config/config.json')).dataSource as Map))
 
         bind ServerErrorHandler, SysErrorHandler
     }
