@@ -1,6 +1,6 @@
 {
-  "host": "localhost",
+  "host": "85.255.15.47",
   "port": 27017,
-  "database": "devio",
+  "database": "adam",
   "noAuthorization": true
 }

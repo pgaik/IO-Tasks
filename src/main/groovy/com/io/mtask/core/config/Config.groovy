@@ -12,7 +12,7 @@ class Config {
     }
 
     private init(){
-        File file = new File('./config/config.json')
+        File file = new File('/home/dusio/Desktop/IO-Tasks/src/ratpack/config.json')
         def config = new JsonSlurper().parse(file).dataSource as Map
         dataSource = new DataSource(host: config.host, port: config.port,
                 database: config.database, username: config.username,
