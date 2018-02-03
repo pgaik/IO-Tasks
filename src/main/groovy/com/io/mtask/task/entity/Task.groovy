@@ -15,7 +15,7 @@ class Task extends BaseEntity {
 
     Long number
 
-    String desctiption
+    String description
 
     String assigned
 

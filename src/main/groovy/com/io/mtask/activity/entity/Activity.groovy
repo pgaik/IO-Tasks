@@ -6,9 +6,11 @@ import org.mongodb.morphia.annotations.Entity
 @Entity
 class Activity extends BaseEntity {
 
-    String number
+    Integer number
 
     String note
 
+    transient String taskId
 
+    Map changeLog = [:]
 }

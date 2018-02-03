@@ -18,6 +18,9 @@ abstract class BaseDAO<T extends BaseEntity> {
     }
 
     abstract Class getClazz()
+    T get(String objectId) {
+    get(new ObjectId(objectId))
+    }
 
     T get(ObjectId objectId) {
         def result = datastore.find(getClazz())
@@ -29,8 +32,18 @@ abstract class BaseDAO<T extends BaseEntity> {
         result as T
     }
 
-    ObjectId insert(T task) {
-        datastore.save(task).id as ObjectId
+    ObjectId insert(T t) {
+        datastore.save(t).id as ObjectId
+    }
+
+    void update(T t) {
+        def query = datastore.find(getClazz())
+                .field('_id').equal(t.id)
+                .field('removedDate').equal(null)
+        def results = datastore.updateFirst(query, t, false)
+        if (results.updatedCount == 0) {
+            throw new Exception()
+        }
     }
 
     void remove(T t) {

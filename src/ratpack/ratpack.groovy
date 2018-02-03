@@ -111,16 +111,29 @@ ratpack {
                         response.status(200).send()
                     }
                 }
+                post { TaskDAO taskDAO, SequenceDAO sequence, TaskValidator validator ->
+                    parse(fromJson(Task)).map { Task task ->
+                        task.id = new ObjectId(pathTokens.id)
+                        validator.validate(task)
+                        task
+                    }.onError {
+                        response.status(400).send()
+                    }.then { Task task ->
+                        taskDAO.update(task)
+                        response.status(200).send()
+                    }
+                }
+
             }
         }
-        post('activity') { ActivityDAO activityDAO, SequenceDAO sequence ->
+        post('activity') { TaskDAO taskDAO, SequenceDAO sequence ->
             parse(fromJson(Activity)).map { Activity activity ->
-                activity.number = sequence.getNext('activity')
                 activity
             }.onError {
                 response.status(400).send()
             }.then { Activity activity ->
-                activityDAO.insert(activity)
+                def task = taskDAO.get(activity.taskId)
+                taskDAO.update(task)
                 response.status(200).send()
             }
         }
